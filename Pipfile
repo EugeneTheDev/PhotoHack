@@ -9,6 +9,7 @@ verify_ssl = true
 gunicorn = "*"
 requests = "*"
 watson-developer-cloud = "*"
+flask = "*"
 
 [requires]
 python_version = "3.7"
