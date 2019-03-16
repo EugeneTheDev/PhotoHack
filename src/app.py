@@ -1,21 +1,28 @@
-import requests
-from flask import jsonify
+import requests as re
+import flask
 from flask import request
 from flask import Flask
-import json
+from flask import Response
+
 app = Flask(__name__)
 base_url = "/api"
 
 
+@app.route(f"{base_url}/upload", methods=["POST"])
+def upload_info():
+    file = request.files["upload"]
+    text = request.form["text"]
+    emotion = ""
 
-# @app.route(f"{base_url}/upload", methods=["POST"])
-# def upload_info():
-#     request.files["upload"].save("./static/image.png")
-#     print(request.form["text"])
-#     return flask.jsonify({
-#         "message": "Successfully uploaded"
-#     })
+    img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
+        "file": (file.filename, file.stream, file.mimetype)}).text
 
+    result_url = re.post(url="http://api-soft.photolab.me/template_process.php", data={
+        "image_url[1]": img_url,
+        "template_name": "1668"  # hardcoded
+    }).text
+    result = re.get(result_url, stream=True)
+    return Response(flask.stream_with_context(result.iter_content()), content_type=result.headers['content-type'])
 
 # @app.route('/stream_file', methods=["POST"])
 # def stream_file():

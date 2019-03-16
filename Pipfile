@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 gunicorn = "*"
 requests = "*"
+watson-developer-cloud = "*"
 
 [requires]
 python_version = "3.7"
