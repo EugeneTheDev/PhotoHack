@@ -1,15 +1,10 @@
-<<<<<<< HEAD
-from flask import Flask, request
 import requests
-=======
-import flask
+from flask import jsonify
 from flask import request
 from flask import Flask
-
+import json
 app = Flask(__name__)
 base_url = "/api"
-
-def textAnalyze():
 
 
 
@@ -21,9 +16,14 @@ def textAnalyze():
 #         "message": "Successfully uploaded"
 #     })
 
-@app.route('/stream_file', methods=["POST"])
-def stream_file():
-    file = request.files['file']
-    sendFile = {"file": (file.filename, file.stream, file.mimetype)}
-    r = requests.post("http://myservicedotcom/upload", files=sendFile)
 
+# @app.route('/stream_file', methods=["POST"])
+# def stream_file():
+#     file = request.files['file']
+#     send_file = {"file": (file.filename, file.stream, file.mimetype)}
+#     r = requests.post("http://myservicedotcom/upload", files=sendFile)
+#
+# # app.run()
+
+
+get_emotions('i am so fucking happy')
