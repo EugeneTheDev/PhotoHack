@@ -16,7 +16,6 @@ def upload_info():
     file = request.files["upload"]
     text = request.form["text"]
     emotion = text_analyze.get_emotions(text)
-    print(emotion)
     img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
         "file": (file.filename, file.stream, file.mimetype)}).text
 
@@ -24,5 +23,4 @@ def upload_info():
         "image_url[1]": img_url,
         "template_name": templates.templates["anger"]  # hardcoded
     }).text
-    result = re.get(result_url, stream=True)
-    return Response(flask.stream_with_context(result.iter_content()), content_type="image/jpeg")
+    return result_url
