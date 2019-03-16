@@ -3,10 +3,45 @@ from watson_developer_cloud.natural_language_understanding_v1 import Features, E
 
 
 def analyze_emotions(emotion_dict):
-    if emotion_dict['anger'] > 0.5:
-        return "triggered"
-    elif emotion_dict['joy'] > 0.5:
-        return "joy"
+    emotions_namings = ['sadness', 'joy', 'disgust', 'anger', 'fear']
+    sad, joy, disgust, anger, fear = emotion_dict['sadness'], emotion_dict['joy'], emotion_dict['disgust'],\
+                                     emotion_dict['anger'], emotion_dict['fear']
+    emotion_list = [sad, joy, disgust, anger, fear]
+    for emotion in emotion_list:
+        if not 0.4 < emotion < 0.7:
+            break
+        return "pokerface"
+    conflicts = [0]*5
+    if sad >= 0.7:
+        return "sadness"
+    elif sad <= 0.4:
+        if joy >= 0.7:
+            return "joy"
+        elif joy <= 0.4:
+            if disgust >= 0.7:
+                return "disgust"
+            elif disgust <= 0.4:
+                if anger >= 0.7:
+                    return "anger"
+                elif anger <= 0.4:
+                    if fear >= 0.7:
+                        return "fear"
+                    elif fear <= 0.4:
+                        return "smile"
+                    else:
+                        conflicts[4] = fear
+                else:
+                    conflicts[3] = anger
+            else:
+                conflicts[2] = disgust
+        else:
+            conflicts[1] = joy
+    else:
+        conflicts[0] = sad
+    maximun = max(conflicts)
+    for i in range(5):
+        if conflicts[i] == maximun:
+            return emotions_namings[i]
 
 
 def get_emotions(text):
@@ -22,3 +57,6 @@ def get_emotions(text):
 
     emotions = analyze_emotions(response['emotion']['document']['emotion'])
     return emotions
+
+
+print(get_emotions(''))
