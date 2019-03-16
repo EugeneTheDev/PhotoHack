@@ -1,29 +1,27 @@
-<<<<<<< HEAD
-from flask import Flask, request
-import requests
-=======
+import requests as re
 import flask
 from flask import request
 from flask import Flask
+from flask import Response
 
 app = Flask(__name__)
 base_url = "/api"
 
-def textAnalyze():
 
+@app.route(f"{base_url}/upload", methods=["POST"])
+def upload_info():
+    file = request.files["upload"]
+    text = request.form["text"]
+    emotion = ""
 
+    img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
+        "file": (file.filename, file.stream, file.mimetype)}).text
 
-# @app.route(f"{base_url}/upload", methods=["POST"])
-# def upload_info():
-#     request.files["upload"].save("./static/image.png")
-#     print(request.form["text"])
-#     return flask.jsonify({
-#         "message": "Successfully uploaded"
-#     })
+    result_url = re.post(url="http://api-soft.photolab.me/template_process.php", data={
+        "image_url[1]": img_url,
+        "template_name": "1668"  # hardcoded
 
-@app.route('/stream_file', methods=["POST"])
-def stream_file():
-    file = request.files['file']
-    sendFile = {"file": (file.filename, file.stream, file.mimetype)}
-    r = requests.post("http://myservicedotcom/upload", files=sendFile)
+    }).text
+    result = re.get(result_url, stream=True)
+    return Response(flask.stream_with_context(result.iter_content()), content_type=result.headers['content-type'])
 
