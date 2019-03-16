@@ -57,6 +57,3 @@ def get_emotions(text):
 
     emotions = analyze_emotions(response['emotion']['document']['emotion'])
     return emotions
-
-
-print(get_emotions(''))

@@ -1,8 +1,6 @@
 import requests as re
-import flask
 from flask import request
 from flask import Flask
-from flask import Response
 
 from src import text_analyze
 from src import templates
