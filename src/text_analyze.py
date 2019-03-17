@@ -1,6 +1,5 @@
-from watson_developer_cloud import NaturalLanguageUnderstandingV1
 from watson_developer_cloud.natural_language_understanding_v1 import Features, EmotionOptions
-
+import watson_developer_cloud
 
 def analyze_emotions(emotion_dict):
     emotions_namings = ['sadness', 'joy', 'disgust', 'anger', 'fear']
@@ -46,17 +45,19 @@ def analyze_emotions(emotion_dict):
 
 def get_emotions(text):
     text = f'<i>{text}</i>'
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
+    natural_language_understanding = watson_developer_cloud.NaturalLanguageUnderstandingV1(
         version='2018-11-16',
         iam_apikey='vcfJHb4lqz67pevf5vnqdOqVe-bOtFefMqUG5Q3c4ha2',
         url='https://gateway-lon.watsonplatform.net/natural-language-understanding/api'
     )
-    response = natural_language_understanding.analyze(
-        html=text,
-        features=Features(emotion=EmotionOptions())).get_result()
+    try:
+        response = natural_language_understanding.analyze(
+            html=text,
+            features=Features(emotion=EmotionOptions())).get_result()
+    except watson_developer_cloud.watson_service.WatsonApiException:
+        return {"success": False, "message": "Language error"}
 
-    emotions = analyze_emotions(response['emotion']['document']['emotion'])
-    return emotions
+    emotion = analyze_emotions(response['emotion']['document']['emotion'])
+    return {"success": True, "emotion": emotion}
 
 
-print(get_emotions(''))

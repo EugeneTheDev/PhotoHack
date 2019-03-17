@@ -1,11 +1,10 @@
-import requests as re
 import flask
 from flask import request
 from flask import Flask
-from flask import Response
-
+from src.ThreadClass import RequestThread
 from src import text_analyze
 from src import templates
+import queue
 
 app = Flask(__name__)
 base_url = "/api"
@@ -14,15 +13,33 @@ base_url = "/api"
 @app.route(f"{base_url}/upload", methods=["POST"])
 def upload_info():
     file = request.files["upload"]
-    text = request.form["text"]
-    emotion = text_analyze.get_emotions(text)
-    print(emotion)
-    img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
-        "file": (file.filename, file.stream, file.mimetype)}).text
+    urls_safe_queue = queue.Queue()
+    threads = []
 
-    result_url = re.post(url="http://api-soft.photolab.me/template_process.php", data={
-        "image_url[1]": img_url,
-        "template_name": templates.templates["anger"]  # hardcoded
-    }).text
-    result = re.get(result_url, stream=True)
-    return Response(flask.stream_with_context(result.iter_content()), content_type="image/jpeg")
+    for temp_name in templates.templates.keys():
+        thread = RequestThread(file, templates.templates[temp_name], temp_name,urls_safe_queue)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    emotion_results = dict({})
+    for i in range(urls_safe_queue.qsize()):
+        emotion_results.update(urls_safe_queue.get())
+
+    return flask.jsonify({"success": True, "emotions": emotion_results})
+
+
+@app.route(f"{base_url}/tonality", methods=["POST"])
+def get_tonality():
+    text = request.form["text"]
+    if not text:
+        return flask.jsonify({"success": False, "message": "String mustn't be empty"})
+    emotion: dict = text_analyze.get_emotions(text)
+    return flask.jsonify(emotion)
+
+
+
+app.run()
+
