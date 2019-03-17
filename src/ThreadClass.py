@@ -11,6 +11,7 @@ class RequestThread(threading.Thread):
         self.file = file
         self.container = container
         self.emotion_name = emotion_name
+        print(template)
 
     def run(self):
         img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
