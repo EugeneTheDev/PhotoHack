@@ -24,7 +24,7 @@ def upload_info():
     for thread in threads:
         thread.join()
 
-    emotion_results = dict({})
+    emotion_results = {}
     for i in range(urls_safe_queue.qsize()):
         emotion_results.update(urls_safe_queue.get())
 
@@ -39,7 +39,4 @@ def get_tonality():
     emotion: dict = text_analyze.get_emotions(text)
     return flask.jsonify(emotion)
 
-
-
-app.run()
 
