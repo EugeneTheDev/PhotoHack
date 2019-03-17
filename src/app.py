@@ -36,7 +36,7 @@ def get_tonality():
     text = request.form["text"]
     if not text:
         return flask.jsonify({"success": False, "message": "String mustn't be empty"})
-    emotion: dict = text_analyze.get_emotions(text*10)
+    emotion: dict = text_analyze.get_emotions(f" {text} "*10)
     return flask.jsonify(emotion)
 
 
