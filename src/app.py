@@ -4,9 +4,12 @@ from flask import Flask
 from src import text_analyze
 from src import templates
 import requests as re
+from src.ThreadClass import RequestThread
+import queue
 
 app = Flask(__name__)
 base_url = "/api"
+
 
 @app.route(f"{base_url}/tonality", methods=["POST"])
 def get_tonality():
@@ -17,22 +20,35 @@ def get_tonality():
     return flask.jsonify(emotion)
 
 
-@app.route(f"{base_url}/upload/<emotion>", methods=["POST"])
-def upload_info(emotion):
+@app.route(f"{base_url}/upload", methods=["POST"])
+def upload_info():
+
     file = request.files["upload"]
-    print(templates.templates.keys())
-    if emotion not in templates.templates:
-        return flask.jsonify({"success": False, "message": "There is no such an emotion"})
-    else:
-        template = templates.templates[emotion]
     img_url = re.post(url="http://upload-soft.photolab.me/upload.php?no_resize=1", files={
         "file": (file.filename, file.stream, file.mimetype)}).text
     if "http" not in img_url:
         return flask.jsonify({"success": False, "message": "Error with img sending"})
-    result_url = re.post(url="http://api-soft.photolab.me/template_process.php", data={
-        "image_url[1]": img_url,
-        "template_name": template
-    }).text
-    if "http" not in result_url:
-        return flask.jsonify({"success": False, "message": "Error with img sending"})
-    return flask.jsonify({"success": True, "url": result_url})
+
+    urls_safe_queue = queue.Queue()
+    threads = []
+
+    for key in templates.templates.keys():
+        thread = RequestThread(img_url, templates.templates[key], key, urls_safe_queue)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    formatted_emotions = dict({})
+
+    for i in range(urls_safe_queue.qsize()):
+        element = urls_safe_queue.get()
+        for key in element.keys():
+            if "http" not in element[key]:
+                return flask.jsonify({"success": False, "message": "Error with img sending"})
+            else:
+                formatted_emotions.update(element)
+    return flask.jsonify({"success": True, "emotions": formatted_emotions})
+
+app.run()
