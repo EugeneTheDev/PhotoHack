@@ -50,5 +50,3 @@ def upload_info():
             else:
                 formatted_emotions.update(element)
     return flask.jsonify({"success": True, "emotions": formatted_emotions})
-
-app.run()
